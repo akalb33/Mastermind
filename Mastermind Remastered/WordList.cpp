@@ -1,0 +1,72 @@
+#include "stdafx.h"
+#include "Util.h"
+#include "WordList.h"
+#include <cstring>
+
+const std::string WordList::mWords[WordList::mSize] = { "LOOK",
+                                                        "EXIT",
+                                                        "PATH",
+                                                        "THAT",
+                                                        "BATH",
+                                                        "TURN",
+                                                        "MOST",
+                                                        "FAST",
+                                                        "WART",
+                                                        "LONG",
+                                                        "SONG",
+                                                        "KEEP",
+                                                        "DOOR",
+                                                        "LORE",
+                                                        "FOUR",
+                                                        "MINE",
+                                                        "LINE",
+                                                        "CHIN",
+                                                        "LEGS",
+                                                        "CART",
+                                                        "WELL",
+                                                        "ZONE",
+                                                        "GAIN",
+                                                        "DRAW",
+                                                        "FILL",
+                                                        "EARS",
+                                                        "OARS",
+                                                        "OATH",
+                                                        "NOPE",
+                                                        "TIME",
+                                                        "FINE",
+                                                        "GONE",
+                                                        "YOUR",
+                                                        "OPEN",
+                                                        "VEIL",
+                                                        "SAIL",
+                                                        "TRUE",
+                                                        "BORN",
+                                                        "OXEN",
+                                                        "PUNY",
+                                                        "DONE",
+                                                        "FINE",
+                                                        "HARD",
+                                                        "EASY",
+                                                        "LEND",
+                                                        "MEND",
+                                                        "WHAT",
+                                                        "TIME",
+                                                        "SOCK",
+                                                        "TAPE",
+                                                        "MAKE",
+                                                        "WITH",
+                                                        "SEEN",
+                                                        "PEAR",
+                                                        "PEER",
+                                                        "COOL",
+                                                        "JOKE",
+                                                        "WORN",
+                                                        "KEYS",
+                                                        "LOCK", };
+
+
+std::string WordList::GetWord()
+{
+   return mWords[Util::RandomInteger(0, mSize - 1)];
+}
+
