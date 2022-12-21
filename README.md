@@ -13,3 +13,5 @@ In the 2 player mode, somebody is able to set the pattern and press the button b
 
 How to run this game:
  - Download the "Mastermind Remastered" folder and run the "Mastermind Remastered.exe" inside of it.
+
+Video Demonstration: https://youtu.be/TllK5HCbiIo
