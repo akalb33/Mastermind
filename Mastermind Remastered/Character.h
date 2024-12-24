@@ -183,6 +183,11 @@ public:
       return found;
    }
 
+   bool isVisible() const { return mVisible; }
+   void setVisible(bool visible) { mVisible = visible; }
+
+   bool isPosInBounds(sf::Vector2f pos);
+   bool isPosInBounds(sf::Vector2i pos);
 
    bool MoveTowardLocation(float destinationX, 
                            float destinationY, 
@@ -213,6 +218,7 @@ public:
 
    StatusManager mStatusManager;
 
+   bool mVisible;
    unsigned int mProcessOrder;
    unsigned int mDisplayOrder;
    const std::type_info& GetType() { return mType; }

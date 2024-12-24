@@ -31,97 +31,106 @@ Board::~Board()
 
 void Board::Process(float deltaTime)
 {
-   if ((mpButton->isPressed() && mCurrentRow != 10 && !mGameOver) || (mpButton->isPressed() && BoardType::IsPlayerChoosingSolution()))
+   bool rowFilled = true;
+   for (int i = 0; i < 4 && rowFilled; i++)
    {
-      bool rowFilled = true;
-      for(int i = 0; i < 4 && rowFilled; i++)
+      if (GetHole(mCurrentRow, i) == 0 || Piece::GetPieceSelected() == true)
+         rowFilled = false;
+   }
+
+   if (mpButton->isVisible() != rowFilled)
+   {
+      mpButton->setVisible(rowFilled);
+   }
+
+   const bool buttonIsPressed = mpButton->isPressed();
+   const bool canCommitGuess = mpButton->isVisible() &&
+                               rowFilled &&
+                               ((buttonIsPressed && mCurrentRow != 10 && !mGameOver) ||
+                               (buttonIsPressed && BoardType::IsPlayerChoosingSolution()));
+
+   if (canCommitGuess)
+   {
+      char guess[4];
+      for (int o = 0; o < 4; o++)
       {
-         if(GetHole(mCurrentRow, i) == 0 || Piece::GetPieceSelected() == true)
-            rowFilled = false;
-      }
-      if (rowFilled)
-      {
-         char guess[4];
-         for (int o = 0; o < 4; o++)
-         {
-            GetHole(mCurrentRow, o)->MakeExhausted();
-            guess[o] = GetHole(mCurrentRow, o)->GetPieceId();
-            if (BoardType::IsPlayerChoosingSolution())
-            {
-               mCombination[o] = guess[o];
-               GetHole(mCurrentRow, o)->Kill();
-               ClearHole(mCurrentRow, o);
-               if (!BoardType::IsColor())
-               {
-                  BlankPiece* pBlankPiece = Character::Resurrect<BlankPiece>();
-                  pBlankPiece->mX = GetX(mCurrentRow, o);
-                  pBlankPiece->mY = GetY(mCurrentRow);
-               }
-            }
-         }
+         GetHole(mCurrentRow, o)->MakeExhausted();
+         guess[o] = GetHole(mCurrentRow, o)->GetPieceId();
          if (BoardType::IsPlayerChoosingSolution())
          {
-            BoardType::SetToChooseSolution(false);
-            mCurrentRow = 0;
-            if (BoardType::IsColor())
+            mCombination[o] = guess[o];
+            GetHole(mCurrentRow, o)->Kill();
+            ClearHole(mCurrentRow, o);
+            if (!BoardType::IsColor())
             {
-               SetShield(mpShield);
+               BlankPiece* pBlankPiece = Character::Resurrect<BlankPiece>();
+               pBlankPiece->mX = GetX(mCurrentRow, o);
+               pBlankPiece->mY = GetY(mCurrentRow);
             }
          }
-         else
+      }
+      if (BoardType::IsPlayerChoosingSolution())
+      {
+         BoardType::SetToChooseSolution(false);
+         mCurrentRow = 0;
+         if (BoardType::IsColor())
          {
-            for (unsigned int i = 0; i < CheckForBlacks(guess) + CheckForWhites(guess); i++)
+            SetShield(mpShield);
+         }
+      }
+      else
+      {
+         for (unsigned int i = 0; i < CheckForBlacks(guess) + CheckForWhites(guess); i++)
+         {
+            Score* pScore = Character::Resurrect<Score>();
+            assert(pScore != 0);
+            pScore->SetType(i >= CheckForBlacks(guess));
+            float additionalY = 0.0f;
+            if (!BoardType::IsColor() && mCurrentRow > 6)
             {
-               Score* pScore = Character::Resurrect<Score>();
-               assert(pScore != 0);
-               pScore->SetType(i >= CheckForBlacks(guess));
-               float additionalY = 0.0f;
-               if (!BoardType::IsColor() && mCurrentRow > 6)
-               {
-                  additionalY = mCurrentRow * 1.15f;
-               }
-               pScore->SetDestination(mScorePosition[i].GetX(),
-                                      mScorePosition[i].GetY() + GetY(mCurrentRow) + additionalY);
-               pScore->mX = mScorePosition[i].GetX() + 100.0f;
-               pScore->mY = -500.0f * i;
-               pScore->SetDisplayOrder(160 + mScorePosition[i].GetDisplayOrder());
-               pScore->SetScoreDisplayOrder(150 + mScorePosition[i].GetDisplayOrder() - mCurrentRow * 4);
-               pScore->SetToBigScale();
+               additionalY = mCurrentRow * 1.15f;
             }
-            if (CheckForBlacks(guess) == 4 || mCurrentRow == 9)
+            pScore->SetDestination(mScorePosition[i].GetX(),
+                                    mScorePosition[i].GetY() + GetY(mCurrentRow) + additionalY);
+            pScore->mX = mScorePosition[i].GetX() + 100.0f;
+            pScore->mY = -500.0f * i;
+            pScore->SetDisplayOrder(160 + mScorePosition[i].GetDisplayOrder());
+            pScore->SetScoreDisplayOrder(150 + mScorePosition[i].GetDisplayOrder() - mCurrentRow * 4);
+            pScore->SetToBigScale();
+         }
+         if (CheckForBlacks(guess) == 4 || mCurrentRow == 9)
+         {
+            if(!BoardType::IsColor())
             {
-               if(!BoardType::IsColor())
+               BlankPiece* pBlank = FindCharacter<BlankPiece>(alive);
+               while (pBlank != 0)
                {
-                  BlankPiece* pBlank = FindCharacter<BlankPiece>(alive);
-                  while (pBlank != 0)
-                  {
-                     pBlank->Kill();
-                     pBlank = FindCharacter<BlankPiece>(alive);
-                  }
+                  pBlank->Kill();
+                  pBlank = FindCharacter<BlankPiece>(alive);
                }
-               else
-               {
-                  mpShield->mVelocityY = -860.0f;
-               }
-
-               for (int i = 0; i < 4; i++)
-               {
-                  Piece* pPiece = Character::Resurrect<Piece>();
-                  assert(pPiece != 0);
-                  pPiece->Init(mCombination[i],
-                               GetX(10, i), 
-                               GetY(10),
-                               Piece::dropped, 
-                               3, 
-                               Piece::exhausted, 
-                               true);
-               }
-               mGameOver = true;
             }
             else
             {
-               mCurrentRow++;
+               mpShield->mVelocityY = -860.0f;
             }
+
+            for (int i = 0; i < 4; i++)
+            {
+               Piece* pPiece = Character::Resurrect<Piece>();
+               assert(pPiece != 0);
+               pPiece->Init(mCombination[i],
+                            GetX(10, i),
+                            GetY(10),
+                            Piece::dropped,
+                            3,
+                            Piece::exhausted,
+                            true);
+            }
+            mGameOver = true;
+         }
+         else
+         {
+            mCurrentRow++;
          }
       }
    }
