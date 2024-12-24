@@ -21,13 +21,11 @@ void Button::Process(float deltaTime)
 {
    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
    {
-      sf::Vector2f mousePosition = GetScreen()->GetMouseViewPosition();
-      float x = mousePosition.x;
-      float y = mousePosition.y;
-      if ((x < GetMaxX() && x > GetMinX()) && (y < GetMaxY() && y > GetMinY()))
-      {
-         mPressed = true;
-      }
+      mPressed = isPosInBounds(GetScreen()->GetMouseViewPosition());
+   }
+   else if (sf::Touch::isDown(0))
+   {
+      mPressed = isPosInBounds(sf::Touch::getPosition(0));
    }
    else
    {

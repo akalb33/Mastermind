@@ -17,6 +17,7 @@ Screen* Character::mpScreen = 0;
 Character::Character(const std::type_info& type)
    : mStatusManager(type)
    , mSprite()
+   , mVisible(true)
    , mProcessOrder(0)
    , mDisplayOrder(0)
    , mX(0.0f)
@@ -58,7 +59,8 @@ void Character::DisplayAll()
       it != mDisplayList.end();
       it++)
    {
-      if ((*it)->GetStatus() != dead)
+      const bool isDead = (*it)->GetStatus() == dead;
+      if (!isDead && (*it)->isVisible())
       {
          (*it)->Display();
          // The following line displays "hitboxes" when hit... keep commented unless testing.
@@ -143,6 +145,18 @@ void Character::Display()
    
 
    mpScreen->draw(mSprite);
+}
+
+bool Character::isPosInBounds(sf::Vector2f pos)
+{
+   float x = pos.x;
+   float y = pos.y;
+   return (x < GetMaxX() && x > GetMinX()) && (y < GetMaxY() && y > GetMinY());
+}
+
+bool Character::isPosInBounds(sf::Vector2i pos)
+{
+   return isPosInBounds(sf::Vector2f((float)pos.x, (float)pos.y));
 }
 
 bool Character::MoveTowardLocation(float destinationX, 
